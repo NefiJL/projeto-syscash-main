@@ -101,7 +101,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                 <label for="categoria_contapagar" class="form-label">Categoria</label>
                                 <select name="categoria_id_contapagar" id="categoria_id_contapagar" class="form-select">
                                     <?php
-                                    $categorias = listarCategoria();
+                                    $categorias = listarCategoriaSaida();
                                     foreach ($categorias as $categoria) {
                                         echo "<option value='" . $categoria["id"] . "'>" . $categoria["descricao"] . "</option>";
                                     }

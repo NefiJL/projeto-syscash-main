@@ -41,7 +41,7 @@ if (filter_input(INPUT_SERVER, "REQUEST_METHOD") === "POST") {
         <div class="col-md-12">
             <div class="row">
                 <div class="col-md-4 d-flex justify-content-start">
-                    <h4>Adicionar Contas a pagar</h4>
+                    <h4>Adicionar Contas a apagar</h4>
                 </div>
                 <div class="col-md-3 d-flex justify-content-center">
                 </div>
@@ -50,7 +50,7 @@ if (filter_input(INPUT_SERVER, "REQUEST_METHOD") === "POST") {
                         <ol class="breadcrumb">
                             <li class="breadcrumb-item"><a href="#" title="Home" id="home_index_contapagar"><i class="fas fa-home"></i>
                                     <span>Home</span></a></li>
-                            <li class="breadcrumb-item"><a href="#" title="Contas a pagar" id="contapagar_index"><i class="fas fa-calendar-plus"></i> <span>Contas a pagar</span></a></li>
+                            <li class="breadcrumb-item"><a href="#" title="Contas a apagar" id="contapagar_index"><i class="fas fa-calendar-plus"></i> <span>Contas a apagar</span></a></li>
                             <li class="breadcrumb-item active" aria-current="page">Adicionar</li>
                         </ol>
                     </nav>
@@ -91,19 +91,8 @@ if (filter_input(INPUT_SERVER, "REQUEST_METHOD") === "POST") {
                                 <input type="text" class="form-control" id="descricao_contapagar" name="descricao_contapagar" maxlength="100" value="<?php echo isset($resultado['descricao']) ? $resultado['descricao'] : ''; ?>" autofocus>
                             </div>
                             <div class="col-md-6">
-                            <label for="favorecido" class="form-label">Favorecido</label>
-                                <select name="favorecido_contapagar" id="favorecido_contapagar" class="form-select">
-                                    <?php
-                                    $favorecidos = listarFavorecido();
-                                    foreach ($favorecidos as $favorecido) {
-                                        if ($favorecido["id"] == $resultado['favorecido']) {
-                                            echo "<option value='" . $favorecido["id"] . "' selected>" . $favorecido["nome"] . "</option>";
-                                        } else {
-                                            echo "<option value='" . $favorecido["id"] . "'>" . $favorecido["nome"] . "</option>";
-                                        }
-                                    }
-                                    ?>
-                                </select>
+                                <label for="favorecido" class="form-label">Favorecido</label>
+                                <input type="text" class="form-control" id="favorecido_contapagar" name="favorecido_contapagar" maxlength="100" value="<?php echo isset($resultado['favorecido']) ? $resultado['favorecido'] : ''; ?>">
                             </div>
                             <div class="col-md-6">
                                 <label for="valor" class="form-label">Valor R$</label>
@@ -118,7 +107,7 @@ if (filter_input(INPUT_SERVER, "REQUEST_METHOD") === "POST") {
                             <div class="col-md-6">
                                 <label for="categoria_contapagar" class="form-label">Categoria</label><select name="categoria_id_contapagar" id="categoria_id_contapagar" class="form-select">
                                     <?php
-                                    $categorias = listarCategoriaEntrada();
+                                    $categorias = listarCategoriaSaida();
                                     foreach ($categorias as $categoria) {
                                         if ($categoria["id"] == $resultado['categoria_id']) {
                                             echo "<option value='" . $categoria["id"] . "' selected>" . $categoria["descricao"] . "</option>";
@@ -169,6 +158,6 @@ if (filter_input(INPUT_SERVER, "REQUEST_METHOD") === "POST") {
 
 <script>
     //devido ao load precisa carregar o arquivo js dessa forma
-    var url = "./js/sistema/conta_pagar.js";
+    var url = "./js/sistema/conta_apagar.js";
     $.getScript(url);
 </script>
