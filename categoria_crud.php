@@ -3,7 +3,6 @@ require_once("valida_acesso.php");
 require_once("conexao.php");
 require_once("categoria_filtro.php");
 
-// operaciones via ajax
 if (filter_input(INPUT_SERVER, "REQUEST_METHOD") === "POST") {
     if (!isset($_POST["acao"])) {
         return;
@@ -69,25 +68,34 @@ if (filter_input(INPUT_SERVER, "REQUEST_METHOD") === "POST") {
                 $conexao = null;
             }
             break;
-        case "excluir":
-            try {
-                $registro = new stdClass();
-                $registro = json_decode($_POST["registro"]);
-
-                $sql = "delete from categoria where id = ? ";
-                $conexao = new PDO("mysql:host=" . SERVIDOR . ";dbname=" . BANCO, USUARIO, SENHA);
-                $pre = $conexao->prepare($sql);
-                $pre->execute(array(
-                    $registro->id
-                ));
-
-                print json_encode(1);
-            } catch (Exception $e) {
-                echo "Erro: " . $e->getMessage() . "<br>";
-            } finally {
-                $conexao = null;
-            }
-            break;
+            case "excluir":
+                try {
+                    $registro = new stdClass();
+                    $registro = json_decode($_POST["registro"]);
+            
+                    $conexao = new PDO("mysql:host=" . SERVIDOR . ";dbname=" . BANCO, USUARIO, SENHA);
+                    $sql = "SELECT COUNT(*) FROM (SELECT * FROM conta_receber WHERE categoria_id = ? UNION ALL SELECT * FROM conta_pagar WHERE categoria_id = ?) AS subquery";
+                    $pre = $conexao->prepare($sql);
+                    $pre->execute(array($registro->id, $registro->id));
+                    $count = $pre->fetchColumn();
+            
+                    if ($count > 0) {
+                        echo "Precisa apagar os registros em conta a pagar ou em conta receber primeiro.";
+                    } else {
+                        $sql = "DELETE FROM categoria WHERE id = ?";
+                        $pre = $conexao->prepare($sql);
+                        $pre->execute(array($registro->id));
+            
+                        echo json_encode(1);
+                    }
+                } catch (Exception $e) {
+                    echo "Erro: " . $e->getMessage() . "<br>";
+                } finally {
+                    $conexao = null;
+                }
+                break;
+            
+            
         case 'buscar':
             try {
                 $registro = new stdClass();
@@ -113,7 +121,7 @@ if (filter_input(INPUT_SERVER, "REQUEST_METHOD") === "POST") {
     }
 }
 
-// consulta sin ajax
+
 function buscarCategoria(int $id)
 {
     try {
@@ -132,7 +140,6 @@ function buscarCategoria(int $id)
     }
 }
 
-// consulta sin ajax
 function listarCategoria()
 {
     try {
@@ -153,7 +160,6 @@ function listarCategoria()
     }
 }
 
-// consulta sin ajax
 function listarCategoriaEntrada()
 {
     try {

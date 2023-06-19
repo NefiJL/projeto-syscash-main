@@ -1,7 +1,7 @@
 <?php
 const SERVIDOR = "localhost";
 
-const BANCO = "projeto_syscash";
+const BANCO = "syscash";
 
 const USUARIO = "root";
 
