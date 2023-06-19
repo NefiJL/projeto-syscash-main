@@ -3,6 +3,7 @@ require_once("valida_acesso.php");
 require_once("categoria_crud.php");
 require_once("favorecido_crud.php");
 
+//a listagem de categoria é geral poderia ser filtrado por status
 if (filter_input(INPUT_SERVER, "REQUEST_METHOD") === "POST") {
     try {
         $erros = [];
@@ -39,7 +40,7 @@ if (filter_input(INPUT_SERVER, "REQUEST_METHOD") === "POST") {
         <div class="col-md-12">
             <div class="row">
                 <div class="col-md-4 d-flex justify-content-start">
-                    <h4>Adicionar Contas a apagar</h4>
+                    <h4>Adicionar Contas a pagar</h4>
                 </div>
                 <div class="col-md-3 d-flex justify-content-center">
                 </div>
@@ -48,7 +49,7 @@ if (filter_input(INPUT_SERVER, "REQUEST_METHOD") === "POST") {
                         <ol class="breadcrumb">
                             <li class="breadcrumb-item"><a href="#" title="Home" id="home_index_contapagar"><i class="fas fa-home"></i>
                                     <span>Home</span></a></li>
-                            <li class="breadcrumb-item"><a href="#" title="Contas a apagar" id="contapagar_index"><i class="fas fa-calendar-plus"></i> <span>Contas a apagar</span></a></li>
+                            <li class="breadcrumb-item"><a href="#" title="Contas a pagar" id="contapagar_index"><i class="fas fa-calendar-plus"></i> <span>Contas a pagar</span></a></li>
                             <li class="breadcrumb-item active" aria-current="page">Adicionar</li>
                         </ol>
                     </nav>
@@ -89,8 +90,8 @@ if (filter_input(INPUT_SERVER, "REQUEST_METHOD") === "POST") {
                                 <input type="text" class="form-control" id="descricao_contapagar" name="descricao_contapagar" maxlength="100" value="<?php echo isset($resultado['descricao']) ? $resultado['descricao'] : ''; ?>" autofocus>
                             </div>
                             <div class="col-md-6">
-                                <label for="favorecido" class="form-label">Favorecido</label>
-                                <select name="favorecido_contapagar" id="favorecido_contapagar" class="form-select">
+                            <label for="favorecido" class="form-label">Favorecido</label>
+                            <select name="favorecido_contapagar" id="favorecido_contapagar" class="form-select">
                                     <?php
                                     $favorecidos = listarFavorecido();
                                     foreach ($favorecidos as $favorecido) {
@@ -123,45 +124,46 @@ if (filter_input(INPUT_SERVER, "REQUEST_METHOD") === "POST") {
                                     ?>
                                 </select>
                                 </div>
-<input type="hidden" id="id_contapagar" name="id_contapagar" value="<?php echo isset($id) ? $id : ''; ?>" />
-<input type="hidden" id="usuario_id_contapagar" name="usuario_id_contapagar" value="<?php echo isset($usuario_id) ? $usuario_id : ''; ?>" />
-</div>
-</div>
-<br>
-<div>
-    <button type="button" class="btn btn-primary" id="botao_salvar_contapagar">Salvar</button>
-    <button type="reset" class="btn btn-secondary" id="botao_limpar_contapagar">Limpar</button>
-</div>
-</form>
-</div>
-<div>
-<input type="hidden" id="pagina_contapagar" name="pagina_contapagar" value="<?php echo isset($pagina) ? $pagina : ''; ?>" />
-<input type="hidden" id="texto_busca_contapagar" name="texto_busca_contapagar" value="<?php echo isset($texto_busca) ? $texto_busca : ''; ?>" />
-</div>
-</div>
-</div>
+                            <input type="hidden" id="id_contapagar" name="id_contapagar" value="<?php echo isset($id) ? $id : '' ?>" />
+                            <input type="hidden" id="usuario_id_contapagar" name="usuario_id_contapagar" value="<?php echo isset($usuario_id) ? $usuario_id : '' ?>" />
+                        </div>
+                    </div>
+                    <br>
+                    <div>
+                        <button type="button" class="btn btn-primary" id="botao_salvar_contapagar">Salvar</button>
+                        <button type="reset" class="btn btn-secondary" id="botao_limpar_contapagar">Limpar</button>
+                    </div>
+                </form>
+            </div>
+            <div>
+                <input type="hidden" id="pagina_contapagar" name="pagina_contapagar" value="<?php echo isset($pagina) ? $pagina : '' ?>" />
+                <input type="hidden" id="texto_busca_contapagar" name="texto_busca_contapagar" value="<?php echo isset($texto_busca) ? $texto_busca : '' ?>" />
+            </div>
+        </div>
+    </div>
 </div>
 
 <!--modal de salvar-->
 <div class="modal fade" id="modal_salvar_contapagar" tabindex="-1" aria-labelledby="logoutlabel" aria-hidden="true">
-<div class="modal-dialog">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h5 class="modal-title" id="logoutlabel_contapagar">Pergunta</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-            Deseja salvar o registro?
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-primary" id="modal_salvar_sim_contapagar">Sim</button>
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Não</button>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="logoutlabel_contapagar">Pergunta</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Deseja salvar o registro?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="modal_salvar_sim_contapagar">Sim</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Não</button>
+            </div>
         </div>
     </div>
 </div>
-</div>
 
 <script>
-var url = "./js/sistema/conta_apagar.js";
-$.getScript(url);
+    //devido ao load precisa carregar o arquivo js dessa forma
+    var url = "./js/sistema/conta_pagar.js";
+    $.getScript(url);
 </script>

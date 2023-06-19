@@ -61,7 +61,7 @@ if (filter_input(INPUT_SERVER, "REQUEST_METHOD") === "POST") {
                     $registro->valor_contapagar,
                     $registro->datavencimento_contapagar,
                     $registro->categoria_id_contapagar,
-                    $registro->id_contapagae
+                    $registro->id_contapagar
                 ));
                 print json_encode(1);
             } catch (Exception $e) {
