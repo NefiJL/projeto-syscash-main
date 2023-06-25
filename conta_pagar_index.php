@@ -145,6 +145,7 @@ try {
                                 <th>Valor R$</th>
                                 <th>Vencimento</th>
                                 <th>Categoria</th>
+                                
                                 <th>A&ccedil;&otilde;es</th>
                             </tr>
                         </thead>

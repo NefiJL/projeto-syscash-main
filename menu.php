@@ -177,6 +177,7 @@ require_once("valida_acesso.php");
   <script src="./js/inputmask/jquery.inputmask.js"></script>
   <script src="./js/chartjs/chart.min.js"></script>
   <script src="./js/sistema/menu.js"></script>
+  <script src="./js/sistema/grafico.js"></script>
 </body>
 
 </html>
