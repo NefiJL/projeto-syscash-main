@@ -1,10 +1,11 @@
 <?php
-session_start();
-require_once("valida_acesso2.php");
+require_once("valida_acesso.php");
+?>
+<?php
 require_once("conexao.php");
 require_once("conta_receber_filtro.php");
 
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
+if (filter_input(INPUT_SERVER, "REQUEST_METHOD") === "POST") {
     if (!isset($_POST["acao"])) {
         return;
     }
@@ -18,7 +19,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $registro = json_decode($_POST['registro']);
                 validaDados($registro);
 
-                $sql = "INSERT INTO conta_receber(descricao, favorecido, valor, data_vencimento, categoria_id, usuario_id) VALUES (?, ?, ?, ?, ?, ?)";
+                $sql = "insert into conta_receber(descricao, favorecido, valor, data_vencimento, categoria_id, usuario_id) VALUES (?, ?, ?, ?, ?, ?) ";
                 $conexao = new PDO("mysql:host=" . SERVIDOR . ";dbname=" . BANCO, USUARIO, SENHA);
                 $pre = $conexao->prepare($sql);
                 $pre->execute(array(
@@ -39,6 +40,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $errosAux .= $e->getMessage();
                 unset($_SESSION["erros"]);
                 echo "Erro: " . $errosAux . "<br>";
+            } finally {
+                $conexao = null;
             }
             break;
         case "editar":
@@ -49,7 +52,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $registro = json_decode($_POST['registro']);
                 validaDados($registro);
 
-                $sql = "UPDATE conta_receber SET descricao = ?, favorecido = ?, valor = ?, data_vencimento = ?, categoria_id = ? WHERE id = ?";
+                $sql = "update conta_receber set descricao = ?, favorecido = ?, valor = ?, data_vencimento = ?, categoria_id = ? where id = ? ";
                 $conexao = new PDO("mysql:host=" . SERVIDOR . ";dbname=" . BANCO, USUARIO, SENHA);
                 $pre = $conexao->prepare($sql);
                 $pre->execute(array(
@@ -62,14 +65,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 ));
                 print json_encode(1);
             } catch (Exception $e) {
-                if (isset($_SESSION["erros"])) {
-                    foreach ($_SESSION["erros"] as $chave => $valor) {
-                        $errosAux .= $valor . "<br>";
-                    }
+                foreach ($_SESSION["erros"] as $chave => $valor) {
+                    $errosAux .= $valor . "<br>";
                 }
                 $errosAux .= $e->getMessage();
                 unset($_SESSION["erros"]);
                 echo "Erro: " . $errosAux . "<br>";
+            } finally {
+                $conexao = null;
             }
             break;
         case "excluir":
@@ -77,7 +80,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $registro = new stdClass();
                 $registro = json_decode($_POST["registro"]);
 
-                $sql = "DELETE FROM conta_receber WHERE id = ?";
+                $sql = "delete from conta_receber where id = ? ";
                 $conexao = new PDO("mysql:host=" . SERVIDOR . ";dbname=" . BANCO, USUARIO, SENHA);
                 $pre = $conexao->prepare($sql);
                 $pre->execute(array(
@@ -87,6 +90,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 print json_encode(1);
             } catch (Exception $e) {
                 echo "Erro: " . $e->getMessage() . "<br>";
+            } finally {
+                $conexao = null;
             }
             break;
         case 'buscar':
@@ -94,7 +99,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $registro = new stdClass();
                 $registro = json_decode($_POST["registro"]);
 
-                $sql = "SELECT * FROM conta_receber WHERE id = ?";
+                $sql = "select * from conta_receber where id = ?";
                 $conexao = new PDO("mysql:host=" . SERVIDOR . ";dbname=" . BANCO, USUARIO, SENHA);
                 $pre = $conexao->prepare($sql);
                 $pre->execute(array(
@@ -104,6 +109,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 print json_encode($pre->fetchAll(PDO::FETCH_ASSOC));
             } catch (Exception $e) {
                 echo "Erro: " . $e->getMessage() . "<br>";
+            } finally {
+                $conexao = null;
             }
             break;
         case 'grafico':
@@ -130,7 +137,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     12 => 'Dezembro'
                 ];
 
-                $sql = "SELECT EXTRACT(MONTH FROM data_vencimento) AS mes, SUM(valor) AS valor FROM conta_receber WHERE usuario_id = ? AND EXTRACT(YEAR FROM data_vencimento) = ? GROUP BY mes ORDER BY mes";
+                $sql = "select extract(month from data_vencimento) as mes, sum(valor) as valor " . "from conta_receber where usuario_id = ? " .
+                    "and extract(year from data_vencimento) = ? " .
+                    "group by mes order by mes";
 
                 $conexao = new PDO("mysql:host=" . SERVIDOR . ";dbname=" . BANCO, USUARIO, SENHA);
                 $pre = $conexao->prepare($sql);
@@ -157,21 +166,53 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                             $receber_aux[$meses[$i]] = 0;
                         }
                     }
-                    $linhas = $receber_aux;
                 }
 
-                foreach ($linhas as $key => $value) {
-                    $retorno[] = array(
-                        "mes" => $key,
-                        "valor" => $value
-                    );
-                }
-
+                $retorno[] = $receber_aux;
                 print json_encode($retorno);
             } catch (Exception $e) {
                 echo "Erro: " . $e->getMessage() . "<br>";
+            } finally {
+                $conexao = null;
             }
             break;
+        default:
+            print json_encode(0);
+            return;
     }
 }
-?>
+
+function buscarcontareceber(int $id)
+{
+    try {
+        $sql = "select * from conta_receber where id = ?";
+        $conexao = new PDO("mysql:host=" . SERVIDOR . ";dbname=" . BANCO, USUARIO, SENHA);
+        $pre = $conexao->prepare($sql);
+        $pre->execute(array(
+            $id
+        ));
+
+        return $pre->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Exception $e) {
+        echo "Erro: " . $e->getMessage() . "<br>";
+    } finally {
+        $conexao = null;
+    }
+}
+
+//consulta sem ajax
+function listarcontareceber()
+{
+    try {
+        $sql = "select * from conta_receber order by descricao";
+        $conexao = new PDO("mysql:host=" . SERVIDOR . ";dbname=" . BANCO, USUARIO, SENHA);
+        $pre = $conexao->prepare($sql);
+        $pre->execute();
+
+        return $pre->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Exception $e) {
+        echo "Erro: " . $e->getMessage() . "<br>";
+    } finally {
+        $conexao = null;
+    }
+}

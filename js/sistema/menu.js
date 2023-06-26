@@ -17,7 +17,6 @@ $(document).ready(function () {
             type: "POST",
             cache: false,
             url: "conta_receber_crud.php",
-
             data: {
                 acao: "grafico",
                 ano: ano,
@@ -28,8 +27,6 @@ $(document).ready(function () {
                 var receber = [];
                 var receber_meses = [];
                 var receber_valores = [];
-                var receber_meses = [];
-                var receber_valores = [];
 
                 $.each(data, function (i, item) {
                     if (i == 0) {
@@ -38,69 +35,41 @@ $(document).ready(function () {
                 });
 
                 $.each(receber, function (i, item) {
-                    receber_meses.push(i);
-                    receber_valores.push(item);
+                    if (!receber_meses.includes(i)) {
+                        receber_meses.push(i);
+                        receber_valores.push(item);
+                    }
                 });
 
-                var dados = {
-                    labels: receber_meses,
-                    datasets: [{
-                        label: "Contas a Receber",
-                        backgroundColor: "#4080bf",
-                        borderColor: "#3973ac",
-                        hoverBackgroundColor: "#ccccff",
-                        hoverBorderColor: "#b3b3ff",
-                        borderWidth: 1,
-                        data: receber_valores
-                    }]
-                   
-                };
-                
-                var grafico_canva = $("#grafico");
+                $.ajax({
+                    type: "POST",
+                    cache: false,
+                    url: "conta_pagar_crud.php",
+                    data: {
+                        acao: "grafico",
+                        ano: ano,
+                        usuario: id_usuario
+                    },
+                    dataType: "json",
+                    success: function (data) {
+                        var pagar = [];
+                        var pagar_meses = [];
+                        var pagar_valores = [];
 
-                var graficoBarra = new Chart(
-                    grafico_canva, {
-                        type: "bar",
-                        data: dados,
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: {
-                                    position: "top",
-                                },
-                                title: {
-                                    display: true,
-                                    text: "Contas - " + ano
-                                }
-                            },
-                            scales: {
-                                y: {
-                                    display: true,
-                                    title: {
-                                        display: true,
-                                        text: "Valores R$",
-                                        color: "#000000",
-                                        font: {
-                                            weight: "bold",
-                                        }
-                                    }
-                                },
-                                x: {
-                                    display: true,
-                                    title: {
-                                        display: true,
-                                        text: "Meses do ano",
-                                        color: "#000000",
-                                        font: {
-                                            weight: "bold",
-                                        }
-                                    }
-                                }
+                        $.each(data, function (i, item) {
+                            pagar = item;
+                        });
+                
+                        $.each(pagar, function (i, item) {
+                            if (!pagar_meses.includes(i)) {
+                                pagar_meses.push(i);
+                                pagar_valores.push(item);
                             }
-                        }
+                        });
+                
+                        renderChart(receber_meses, receber_valores, pagar_meses, pagar_valores, ano);
                     }
-                );
+                });
             },
             error: function (e) {
                 $("#div_mensagem_texto_menu").empty().append(e.responseText);
@@ -113,59 +82,6 @@ $(document).ready(function () {
                 $("#carregando_menu").addClass("d-none");
             }
         });
-
-         $.ajax({
-            type: "POST",
-            cache: false,
-            url: "conta_pagar_crud.php",
-             data: {
-                acao: "grafico",
-                 ano: ano,
-                 usuario: id_usuario
-            },
-             dataType: "json",
-            success: function (data) {
-                 var pagar = [];
-                var pagar_meses = [];
-                 var pagar_valores = [];
-        
-                $.each(data, function (i, item) {
-                    if (i == 0) {
-                         pagar = item;
-                     }
-                 });
-        
-                 $.each(pagar, function (i, item) {
-                     pagar_meses.push(i);
-                     pagar_valores.push(item);
-                 });
-        
-                 // Adicionando os dados de Contas a Pagar ao objeto 'dados'
-                 dados.datasets.push({
-                     label: "Contas a Pagar",
-                     backgroundColor: "red",
-                     borderColor: "#3973ac",
-                     hoverBackgroundColor: "red",
-                     hoverBorderColor: "#b3b3ff",
-                     borderWidth: 1,
-                     data: pagar_valores
-                 });
-        
-                 // Atualizando o gráfico
-                 graficoBarra.update();
-             },
-             error: function (e) {
-                 $("#div_mensagem_texto_menu").empty().append(e.responseText);
-                 $("#div_mensagem_menu").show();
-             },
-             beforeSend: function () {
-                 $("#carregando_menu").removeClass("d-none");
-             },
-             complete: function () {
-                 $("#carregando_menu").addClass("d-none");
-             }
-         });
-
     });
 
     $("#home_link").click(function () {
@@ -178,7 +94,7 @@ $(document).ready(function () {
 
     $("#favorecido_link").click(function (e) {
         $("#conteudo").load("favorecido_index.php");
-    });
+    });;
 
     $("#contareceber_link").click(function (e) {
         $("#conteudo").load("conta_receber_index.php");
@@ -239,4 +155,73 @@ $(document).ready(function () {
     }
     linkColor.forEach(l => l.addEventListener('click', colorLink));
 
+    function renderChart(receber_meses, receber_valores, pagar_meses, pagar_valores, ano) {
+        var dados = {
+            labels: receber_meses.concat(pagar_meses.filter(mes => !receber_meses.includes(mes))),
+            datasets: [{
+                label: "Contas a Receber",
+                backgroundColor: "#4080bf",
+                borderColor: "#3973ac",
+                hoverBackgroundColor: "#ccccff",
+                hoverBorderColor: "#b3b3ff",
+                borderWidth: 1,
+                data: receber_valores
+            },
+            {
+                label: "Contas a Pagar",
+                backgroundColor: '#ff3300',
+                borderColor: '#e62e00',
+                hoverBackgroundColor: '#ffe6e6',
+                hoverBorderColor: '#ffcccc',
+                borderWidth: 1,
+                data: pagar_valores
+            }]
+        };
+
+        var grafico_canva = $("#grafico");
+    
+        var graficoBarra = new Chart(
+            grafico_canva, {
+                type: "bar",
+                data: dados,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: "top",
+                        },
+                        title: {
+                            display: true,
+                            text: "Contas a Pagar e Receber - " + ano
+                        }
+                    },
+                    scales: {
+                        y: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: "Valores R$",
+                                color: "#000000",
+                                font: {
+                                    weight: "bold",
+                                }
+                            }
+                        },
+                        x: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: "Meses do ano",
+                                color: "#000000",
+                                font: {
+                                    weight: "bold",
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        );
+    }
 });

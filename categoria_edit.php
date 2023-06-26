@@ -100,7 +100,7 @@ if (filter_input(INPUT_SERVER, "REQUEST_METHOD") === "POST") {
                     <br>
                     <div>
                         <button type="button" class="btn btn-primary" id="botao_salvar_categoria">Salvar</button>
-                        <button type="reset" class="btn btn-secondary" id="botao_limpar_categoria">Limpar</button>
+                        
                     </div>
                 </form>
             </div>
