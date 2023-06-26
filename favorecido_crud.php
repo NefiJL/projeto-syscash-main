@@ -46,7 +46,7 @@ if (filter_input(INPUT_SERVER, "REQUEST_METHOD") === "POST") {
 
                 $registro = new stdClass();
                 $registro = json_decode($_POST['registro']);
-                validaDados2($registro);
+                validaFavorecido($registro);
 
                 $sql = "update favorecido set nome = ? where id = ? ";
                 $conexao = new PDO("mysql:host=" . SERVIDOR . ";dbname=" . BANCO, USUARIO, SENHA);
@@ -151,8 +151,3 @@ function listarFavorecido()
     }
 }
 
-function validaDados2($registro)
-{
-    $erros = array();
-
-}

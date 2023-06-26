@@ -94,25 +94,25 @@ if (filter_input(INPUT_SERVER, "REQUEST_METHOD") === "POST") {
                 $conexao = null;
             }
             break;
-        case 'buscar':
-            try {
-                $registro = new stdClass();
-                $registro = json_decode($_POST["registro"]);
-
-                $sql = "select * from conta_receber where id = ?";
-                $conexao = new PDO("mysql:host=" . SERVIDOR . ";dbname=" . BANCO, USUARIO, SENHA);
-                $pre = $conexao->prepare($sql);
-                $pre->execute(array(
-                    $registro->id
-                ));
-
-                print json_encode($pre->fetchAll(PDO::FETCH_ASSOC));
-            } catch (Exception $e) {
-                echo "Erro: " . $e->getMessage() . "<br>";
-            } finally {
-                $conexao = null;
-            }
-            break;
+            case 'buscar':
+                try {
+                    $registro = new stdClass();
+                    $registro = json_decode($_POST["registro"]);
+    
+                    $sql = "select * from conta_pagar where id = ?";
+                    $conexao = new PDO("mysql:host=" . SERVIDOR . ";dbname=" . BANCO, USUARIO, SENHA);
+                    $pre = $conexao->prepare($sql);
+                    $pre->execute(array(
+                        $registro->id
+                    ));
+    
+                    print json_encode($pre->fetchAll(PDO::FETCH_ASSOC));
+                } catch (Exception $e) {
+                    echo "Erro: " . $e->getMessage() . "<br>";
+                } finally {
+                    $conexao = null;
+                }
+                break;
         case 'grafico':
             try {
                 $ano = filter_var($_POST["ano"], FILTER_VALIDATE_INT);
