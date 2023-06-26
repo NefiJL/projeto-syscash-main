@@ -99,7 +99,7 @@ if (filter_input(INPUT_SERVER, "REQUEST_METHOD") === "POST") {
                     $registro = new stdClass();
                     $registro = json_decode($_POST["registro"]);
     
-                    $sql = "select * from conta_pagar where id = ?";
+                    $sql = "select * from favorecido where id = ?";
                     $conexao = new PDO("mysql:host=" . SERVIDOR . ";dbname=" . BANCO, USUARIO, SENHA);
                     $pre = $conexao->prepare($sql);
                     $pre->execute(array(

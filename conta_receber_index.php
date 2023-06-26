@@ -1,11 +1,13 @@
 <?php
 require_once("valida_acesso.php");
+?>
+<?php
 require_once("conexao.php");
 require_once("categoria_crud.php");
 require_once("favorecido_crud.php");
 
 try {
-   
+    
     $texto_busca = "";
     $pagina = 1;
     $inicio = 0;
@@ -13,7 +15,7 @@ try {
     $barra_paginacao = "";
     $usuario_id = isset($_SESSION["usuario_id"]) ? $_SESSION["usuario_id"] : 0;
 
-    if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    if (filter_input(INPUT_SERVER, "REQUEST_METHOD") === "POST") {
         if (isset($_POST["texto_busca_contareceber"])) {
             $texto_busca = filter_input(INPUT_POST, "texto_busca_contareceber", FILTER_SANITIZE_STRING);
         }
@@ -29,15 +31,17 @@ try {
 
     $conexao = new PDO("mysql:host=" . SERVIDOR . ";dbname=" . BANCO, USUARIO, SENHA);
 
-    $sql = "SELECT * FROM conta_receber WHERE (id LIKE :palavra OR descricao LIKE :palavra OR favorecido LIKE :palavra) AND usuario_id = :id ORDER BY id ASC ";
+    //Sql para ser consultada
+    $sql = "select * from conta_receber where (id like :palavra or descricao like :palavra or favorecido like :palavra) and usuario_id = :id order by id asc ";
 
+    // Codificação da paginação
     $pre_pagina = $conexao->prepare($sql);
     $pre_pagina->bindValue(":palavra", "%" . $texto_busca . "%", PDO::PARAM_STR);
     $pre_pagina->bindValue(":id", $usuario_id, PDO::PARAM_INT);
     $pre_pagina->execute();
     $resultado_pagina = $pre_pagina->rowCount();
 
-    if ($resultado_pagina > 0) {
+    if (!empty($resultado_pagina)) {
         $barra_paginacao .= "<div style='text-align:center;margin:20px 0px;'>";
         $total_paginas = ceil($resultado_pagina / REGISTROS_POR_PAGINA);
         if ($total_paginas > 1) {
@@ -52,7 +56,7 @@ try {
         $barra_paginacao .= "</div>";
     }
 
-    $limite = "LIMIT " . $inicio . ", " . REGISTROS_POR_PAGINA;
+    $limite = "limit " . $inicio . ", " . REGISTROS_POR_PAGINA;
 
     $sql = $sql . $limite;
     $pre_registros = $conexao->prepare($sql);
@@ -76,7 +80,7 @@ try {
         <div class="col-md-12">
             <div class="row">
                 <div class="col-md-4 d-flex justify-content-start">
-                    <h4>Lista de Contas a Receber</h4>
+                    <h4>Lista de Contas a receber</h4>
                 </div>
                 <div class="col-md-4 d-flex justify-content-center">
                 </div>
@@ -85,7 +89,7 @@ try {
                         <ol class="breadcrumb">
                             <li class="breadcrumb-item"><a href="#" title="Home" id="home_index_contareceber"><i class="fas fa-home"></i>
                                     <span>Home</span></a></li>
-                            <li class="breadcrumb-item active" aria-current="page">Contas a Receber</li>
+                            <li class="breadcrumb-item active" aria-current="page">Contas a receber</li>
                         </ol>
                     </nav>
                 </div>
@@ -98,10 +102,8 @@ try {
                 <div class="col-md-4 d-flex justify-content-center">
                 </div>
                 <div class="col-md-4 d-flex justify-content-end">
-                    <form method="POST" action="<?php echo $_SERVER['PHP_SELF']; ?>">
-                        <input type="text" name="texto_busca_contareceber" value="<?php echo $texto_busca; ?>" maxlength="25">
-                        <button type="submit" class="btn btn-primary btn-sm" title="Pesquisar" id="botao_pesquisar_contareceber"><i class="fas fa-search"></i>&nbsp;Pesquisar</button>
-                    </form>
+                    <input type="text" name="texto_busca" value="<?php echo $texto_busca; ?>" id="texto_busca_contareceber" maxlength="25">
+                    <a id="botao_pesquisar_contareceber" class="btn btn-primary btn-sm" title="Pesquisar"><i class="fas fa-search"></i>&nbsp;Pesquisar</a>
                 </div>
             </div>
             <hr>
@@ -110,7 +112,8 @@ try {
             <?php
             if (isset($_SESSION["erros"])) {
                 echo "<div class='alert alert-warning alert-dismissible fade show' role='alert'>";
-                echo "<button type='button' class='btn-close btn-sm' data-bs-dismiss='alert' aria-label='Close'></button>";
+                echo "<button type='button' class='btn-close btn-sm' data-bs-dismiss='alert'
+                aria-label='Close'></button>";
                 foreach ($_SESSION["erros"] as $chave => $valor) {
                     echo $valor . "<br>";
                 }
@@ -127,7 +130,7 @@ try {
             ?>
                 <div class="alert alert-info alert-dismissible fade show" role="alert">
                     <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert" aria-label="Close"></button>
-                    Nenhuma conta a receber encontrada!
+                    Nenhuma conta receber encontrada!
                 </div>
             <?php
             } else {
@@ -142,6 +145,7 @@ try {
                                 <th>Valor R$</th>
                                 <th>Vencimento</th>
                                 <th>Categoria</th>
+                                
                                 <th>A&ccedil;&otilde;es</th>
                             </tr>
                         </thead>
@@ -150,7 +154,6 @@ try {
                             foreach ($contas as $conta) {
                             ?>
                                 <tr id="<?php echo $conta['id'] . "_contareceber"; ?>">
-                             
                                     <td><?php echo $conta["id"]; ?></td>
                                     <td><?php echo $conta["descricao"]; ?></td>
                                     <td><?php echo buscarfavorecido($conta["favorecido"])[0]["nome"]; ?></td>
@@ -177,7 +180,6 @@ try {
     </div>
 </div>
 
-<!--modal de excluir-->
 <div class="modal fade" id="modal_excluir_contareceber" tabindex="-1" aria-labelledby="logoutlabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -198,7 +200,6 @@ try {
 </div>
 
 <script>
-    //devido ao load precisa carregar o arquivo js dessa forma
-    var url = "./js/sistema/conta_receber.js?rnd=" + Math.random();
+    var url = "./js/sistema/conta_receber.js";
     $.getScript(url);
 </script>
